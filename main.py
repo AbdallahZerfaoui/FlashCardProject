@@ -1,6 +1,7 @@
 from tkinter import *
 import pandas as pd
 from random import choice
+import os
 
 from tkinter import messagebox
 
@@ -11,10 +12,24 @@ FONT_NAME = "Arial"
 TITLE_POS = (400, 150)
 WORD_POS = (400, 263)
 
-data_words = pd.read_csv("data/french_words.csv")
+if os.path.exists("data/words_to_learn.csv"):
+    data_words = pd.read_csv("data/words_to_learn.csv")
+else:
+    data_words = pd.read_csv("data/french_words.csv")
+    print("im here")
+
 data_words = data_words.to_dict(orient="records")
 
 after_id = None
+button_right_pressed = None
+new_card = None
+# ---------------------------- SAVE PROGRESS------------------------------- #
+def save_progress():
+    global new_card
+    data_words.remove(new_card)
+    to_learn = pd.DataFrame(data_words)
+    to_learn.to_csv("data/words_to_learn.csv", index=False)
+
 # ---------------------------- DISPLAY WORDS------------------------------- #
 def flip_card(card):
     image_back = PhotoImage(file="./images/card_back.png")
@@ -25,7 +40,7 @@ def flip_card(card):
 
 def display_words():
     #global title_displayed, word_displayed
-    global after_id
+    global after_id, new_card
 
     canvas.itemconfig(card_side, image=image_front)
 
@@ -65,7 +80,7 @@ button_wrong = Button(image=image_wrong, bg=BACKGROUND_COLOR, highlightthickness
 button_wrong.grid(column=0, row=1, columnspan=1)
 
 image_right = PhotoImage(file="./images/right.png")
-button_right = Button(image=image_right, bg=BACKGROUND_COLOR, command=display_words)
+button_right = Button(image=image_right, bg=BACKGROUND_COLOR, command=lambda : display_words() or save_progress())
 button_right.grid(column=1, row=1, columnspan=1)
 
 
